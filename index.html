@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+
+(()=>{
+
+  class Comment {
+
+    constructor(content,children){
+      this.content = content;
+      this.children = children;
+    }
+
+    // インスタンスを作成しそのプロパティをイテレートしたい
+    *[Symbol.iterator](){
+      yield this.content;
+      
+      for(const child of this.children){
+        yield* child; // デリゲート
+      }
+    }
+  }
+
+  const children = [
+    new Comment("賛成",[]),
+    new Comment("反対",[]),
+    new Comment("うーん…",[])
+  ]
+
+  const MyComment = new Comment("非常に良い記事だ！",children);
+
+  for(const cmnt of MyComment){
+    console.log(cmnt);
+  }
+
+})();
+
+(() => {
+
+  return;
+
+  const testingTeam = {
+    lead: "A男",
+    tester: "B男",
+    department: "テスト部",
+    [Symbol.iterator]: function* (){
+      yield this.lead;
+      yield this.tester;
+    }
+  }
+
+  const engineeringTeam = {
+    testingTeam,
+    size: 3,
+    department: "開発部",
+    lead: "A太",
+    manager: "B太",
+    engineer: "C太",
+    [Symbol.iterator]: function* (){
+      yield this.lead;
+      yield this.manager;
+      yield this.engineer;
+      yield* this.testingTeam; // デリゲート
+    }
+  }
+  
+  let names = [];
+  for(const name of engineeringTeam){
+    names.push(name);
+  }
+  console.log(names); // (5) ["A太", "B太", "C太", "A男", "B男"]
+
+})();
+
+(()=>{
+  return;
+  async function* ajax(){
+
+    let error = null;
+    
+    const r = await fetch("data_01.json")
+      .then(res => res.json())
+      .catch(e => {
+        console.log("hi");
+        error = e;
+      })
+
+    console.log(error)
+
+    if(!error){
+      yield r;
+    }
+
+  }
+
+  let a = ajax();
+  console.log(a.next().value)
+  console.log(a.next())
+
+})();
+
+
+(()=>{
+  return;
+  // 大吉・吉・中吉・小吉・末吉・凶・大凶
+  function* lot(){
+    const type = ["大吉","吉","中吉","小吉","末吉","凶","大凶"];
+    while(true){
+      yield type[Math.floor(Math.random() * type.length)];
+    }
+  }
+
+  for(const result of lot()){
+    console.log(result)
+    if(result === "大吉") break;
+  }
+})();
+
+(()=>{
+  let loop = true;
+
+  while(loop){
+    const result = lot();
+    console.log(result);
+    if(result === "大吉") loop = false;
+  }
+
+  function lot(){
+    const type = ["大吉","吉","中吉","小吉","末吉","凶","大凶"];
+    return type[Math.floor(Math.random() * type.length)];
+  }
+})();
+
+
+  </script>
+</body>
+</html>
